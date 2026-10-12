@@ -27,3 +27,4 @@ Instale as dependências:
 
 ```bash
 pip install -r requirements.txt
+Esta versão inclui uma etapa de revisão técnica para melhorar a organização, a legibilidade e a manutenção do projeto.
