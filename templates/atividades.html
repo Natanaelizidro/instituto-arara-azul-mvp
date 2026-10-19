@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Atividades - Instituto Arara Azul</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px 18px;
+            font-family: Arial, sans-serif;
+            background: #edf6ff;
+            color: #243447;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        header {
+            background: linear-gradient(135deg, #07529b, #0875d1);
+            color: white;
+            padding: 30px;
+            margin-bottom: 24px;
+            border-radius: 18px;
+            box-shadow: 0 8px 24px rgba(7, 82, 155, 0.15);
+        }
+
+        header h1 {
+            margin: 0 0 8px;
+            color: white;
+            font-size: 30px;
+        }
+
+        header p {
+            margin: 0 0 20px;
+            color: #eef7ff;
+        }
+
+        h2 {
+            color: #07529b;
+            margin-bottom: 18px;
+        }
+
+        h3 {
+            color: #07529b;
+            margin-top: 0;
+            overflow-wrap: anywhere;
+        }
+
+        a, button {
+            display: inline-block;
+            padding: 11px 17px;
+            margin: 5px 5px 5px 0;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        a {
+            background: #0875d1;
+            color: white;
+        }
+
+        header a {
+            background: white;
+            color: #07529b;
+        }
+
+        a:hover, button:hover {
+            transform: translateY(-1px);
+        }
+
+        a:hover {
+            background: #dceeff;
+        }
+
+        button {
+            background: #16734b;
+            color: white;
+            border: none;
+        }
+
+        button:hover {
+            background: #105b3a;
+        }
+
+        a:focus-visible, button:focus-visible, select:focus-visible {
+            outline: 3px solid #f0a500;
+            outline-offset: 3px;
+        }
+
+        .acessibilidade {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            background: white;
+            border: 1px solid #d7e8f8;
+            border-radius: 14px;
+            box-shadow: 0 3px 12px rgba(24, 72, 120, 0.05);
+        }
+
+        .acessibilidade button {
+            min-width: 52px;
+            background: #064fbd;
+            border: 2px solid #064fbd;
+            font-size: 18px;
+        }
+
+        .acessibilidade button:hover {
+            background: #043b8d;
+        }
+
+        #aviso-fonte {
+            font-weight: bold;
+            color: #243447;
+        }
+
+        article {
+            background: white;
+            padding: 24px;
+            margin-bottom: 18px;
+            border: 1px solid #dce9f5;
+            border-left: 5px solid #16734b;
+            border-radius: 14px;
+            box-shadow: 0 5px 18px rgba(24, 72, 120, 0.07);
+        }
+
+        article p {
+            overflow-wrap: anywhere;
+        }
+
+        .mensagem {
+            background: #e4f7eb;
+            color: #145c37;
+            padding: 14px 18px;
+            border-left: 4px solid #16734b;
+            border-radius: 8px;
+        }
+
+        label {
+            display: block;
+            margin: 14px 0 7px;
+            font-weight: bold;
+        }
+
+        select {
+            width: 100%;
+            max-width: 300px;
+            padding: 11px;
+            background: white;
+            color: #243447;
+            border: 1px solid #a9c4dc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        form {
+            margin-top: 12px;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 16px 12px;
+            }
+
+            header {
+                padding: 22px 18px;
+            }
+
+            header h1 {
+                font-size: 25px;
+            }
+
+            article {
+                padding: 18px;
+            }
+
+            a, button {
+                min-height: 44px;
+            }
+
+            select {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <header>
+            <h1>Instituto Arara Azul</h1>
+            <p>Organização e acompanhamento de atividades.</p>
+
+            <a href="{{ url_for('nova_atividade') }}">
+                Cadastrar atividade
+            </a>
+
+            <a href="{{ url_for('logout') }}">
+                Sair
+            </a>
+        </header>
+
+        <div class="acessibilidade"
+             role="group"
+             aria-label="Controles de acessibilidade">
+
+            <button type="button"
+                    onclick="alterarFonte(1)"
+                    aria-label="Aumentar tamanho da fonte">
+                A+
+            </button>
+
+            <button type="button"
+                    onclick="alterarFonte(-1)"
+                    aria-label="Diminuir tamanho da fonte">
+                A−
+            </button>
+
+            <span id="aviso-fonte"
+                  role="status"
+                  aria-live="polite"></span>
+        </div>
+
+        {% with mensagens = get_flashed_messages(with_categories=true) %}
+            {% for categoria, mensagem in mensagens %}
+                <p class="mensagem" role="status">
+                    {{ mensagem }}
+                </p>
+            {% endfor %}
+        {% endwith %}
+
+        <h2>Minhas atividades</h2>
+
+        {% for atividade in atividades %}
+            <article>
+                <h3>{{ atividade.titulo }}</h3>
+
+                <p>{{ atividade.descricao }}</p>
+
+                <p>
+                    <strong>Status:</strong>
+                    {{ atividade.status }}
+                </p>
+
+                <form method="POST"
+                      action="{{ url_for('alterar_status', id=atividade.id) }}">
+
+                    <label for="status-{{ atividade.id }}">
+                        Atualizar status
+                    </label>
+
+                    <select id="status-{{ atividade.id }}" name="status">
+                        {% for status in ['Pendente', 'Em andamento', 'Concluída'] %}
+                            <option value="{{ status }}"
+                                {% if atividade.status == status %}selected{% endif %}>
+                                {{ status }}
+                            </option>
+                        {% endfor %}
+                    </select>
+
+                    <button type="submit">Salvar status</button>
+                </form>
+
+                <form method="POST"
+                      action="{{ url_for('excluir_atividade', id=atividade.id) }}"
+                      onsubmit="return confirm('Deseja excluir esta atividade?')">
+
+                    <button type="submit">Excluir atividade</button>
+                </form>
+            </article>
+
+        {% else %}
+            <article>
+                <h3>Nenhuma atividade cadastrada</h3>
+                <p>
+                    Clique em “Cadastrar atividade” para começar.
+                </p>
+            </article>
+        {% endfor %}
+    </main>
+
+    <script>
+        let tamanhoFonte = 16;
+
+        function alterarFonte(direcao) {
+            tamanhoFonte += direcao * 2;
+
+            if (tamanhoFonte > 24) tamanhoFonte = 24;
+            if (tamanhoFonte < 12) tamanhoFonte = 12;
+
+            document.body.style.fontSize = tamanhoFonte + "px";
+
+            document.getElementById("aviso-fonte").textContent =
+                "Tamanho da fonte: " + tamanhoFonte + " pixels.";
+        }
+    </script>
+</body>
+</html>

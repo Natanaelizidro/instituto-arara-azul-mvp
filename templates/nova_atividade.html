@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Nova atividade - Instituto Arara Azul</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(135deg, #eaf5ff, #edf7f1);
+            color: #18334d;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 760px;
+            padding: 38px;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 12px 35px rgba(24, 77, 110, 0.12);
+        }
+
+        .marca {
+            text-align: center;
+            padding-bottom: 25px;
+            margin-bottom: 28px;
+            border-bottom: 1px solid #e6edf3;
+        }
+
+        .simbolo {
+            width: 62px;
+            height: 62px;
+            margin: 0 auto 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            background: #e5f5eb;
+            color: #167451;
+            font-size: 27px;
+            font-weight: bold;
+            border: 2px solid #b9e4ca;
+        }
+
+        .marca h2 {
+            margin: 0;
+            color: #174d82;
+            font-size: 24px;
+        }
+
+        h1 {
+            margin: 0 0 12px;
+            color: #174d82;
+            font-size: 34px;
+        }
+
+        .introducao {
+            margin-bottom: 28px;
+            color: #60758a;
+            line-height: 1.6;
+        }
+
+        label {
+            display: block;
+            margin: 20px 0 9px;
+            font-weight: bold;
+            color: #24435f;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 14px 15px;
+            border: 1px solid #cbd8e5;
+            border-radius: 10px;
+            font: inherit;
+            color: #18334d;
+            background: #fbfdff;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input {
+            min-height: 50px;
+        }
+
+        textarea {
+            min-height: 140px;
+            resize: vertical;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: 3px solid #c6e6ff;
+            border-color: #1685cc;
+            background: #ffffff;
+        }
+
+        .botao {
+            width: 100%;
+            margin-top: 26px;
+            padding: 16px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(100deg, #269c58, #087fc1);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .botao:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 16px rgba(8, 127, 193, 0.2);
+        }
+
+        .botao:focus-visible,
+        .voltar:focus-visible {
+            outline: 3px solid #f0a500;
+            outline-offset: 4px;
+        }
+
+        .voltar {
+            display: inline-block;
+            margin-top: 24px;
+            color: #087fc1;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .voltar:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 18px 12px;
+            }
+
+            .container {
+                padding: 25px 20px;
+                border-radius: 15px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .marca h2 {
+                font-size: 21px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="container">
+        <header class="marca">
+            <div class="simbolo" aria-hidden="true">AA</div>
+            <h2>Instituto Arara Azul</h2>
+        </header>
+
+        <h1>Nova atividade</h1>
+
+        <p class="introducao">
+            Cadastre uma atividade para organizar as ações
+            do Instituto Arara Azul.
+        </p>
+
+        <form method="POST">
+            <label for="titulo">Título da atividade</label>
+            <input
+                type="text"
+                id="titulo"
+                name="titulo"
+                placeholder="Ex.: Mutirão de limpeza"
+                required
+            >
+
+            <label for="descricao">Descrição da atividade</label>
+            <textarea
+                id="descricao"
+                name="descricao"
+                placeholder="Descreva os objetivos e as etapas da atividade..."
+                required
+            ></textarea>
+
+            <button type="submit" class="botao">
+                + Cadastrar atividade
+            </button>
+        </form>
+
+        <a href="{{ url_for('atividades') }}" class="voltar">
+            ← Voltar para atividades
+        </a>
+    </main>
+</body>
+</html>SS
