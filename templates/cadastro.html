@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cadastro - Instituto Arara Azul</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #e5f3ff, #f1f8f4);
+            color: #26384a;
+        }
+
+        .cartao {
+            width: 100%;
+            max-width: 460px;
+            padding: 32px;
+            background: white;
+            border: 1px solid #d8e8f5;
+            border-radius: 20px;
+            box-shadow: 0 12px 35px rgba(7, 82, 155, 0.12);
+        }
+
+        /* Controles de acessibilidade */
+        .controles-acessibilidade {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .controles-acessibilidade button {
+            width: 48px;
+            min-width: 48px;
+            min-height: 42px;
+            margin: 0;
+            padding: 8px;
+            border: none;
+            border-radius: 8px;
+            background: #07529b;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .controles-acessibilidade button:hover {
+            background: #064078;
+        }
+
+        button:focus-visible,
+        a:focus-visible,
+        input:focus-visible {
+            outline: 3px solid #f0a500;
+            outline-offset: 3px;
+        }
+
+        .marca {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #e2f4e9;
+            color: #16734b;
+            font-size: 1.75rem;
+            font-weight: bold;
+        }
+
+        h1 {
+            margin: 0;
+            color: #07529b;
+            text-align: center;
+            font-size: 1.625rem;
+        }
+
+        .subtitulo {
+            margin: 12px 0 24px;
+            color: #526b85;
+            text-align: center;
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+
+        label {
+            display: block;
+            margin: 15px 0 7px;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            min-height: 46px;
+            padding: 12px;
+            border: 1px solid #b9cfe3;
+            border-radius: 9px;
+            background: #fbfdff;
+            color: #26384a;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        .botao-cadastro {
+            width: 100%;
+            min-height: 48px;
+            margin-top: 24px;
+            padding: 12px;
+            border: none;
+            border-radius: 9px;
+            background: #16734b;
+            color: white;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .botao-cadastro:hover {
+            background: #105b3a;
+        }
+
+        .mensagem {
+            padding: 12px;
+            border-radius: 8px;
+            background: #fff0f0;
+            color: #9b2222;
+            line-height: 1.5;
+            font-size: 1rem;
+        }
+
+        .voltar {
+            display: block;
+            margin-top: 20px;
+            color: #07529b;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .voltar:hover {
+            color: #16734b;
+        }
+
+        .rodape {
+            margin: 24px 0 0;
+            color: #637b93;
+            text-align: center;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 480px) {
+            .cartao {
+                padding: 24px 20px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="cartao">
+
+        <!-- Botões de acessibilidade -->
+        <div class="controles-acessibilidade"
+             role="group"
+             aria-label="Controles de tamanho das letras">
+
+            <button
+                type="button"
+                id="diminuir-letras"
+                aria-label="Diminuir tamanho das letras"
+                title="Diminuir letras">
+                A−
+            </button>
+
+            <button
+                type="button"
+                id="aumentar-letras"
+                aria-label="Aumentar tamanho das letras"
+                title="Aumentar letras">
+                A+
+            </button>
+        </div>
+
+        <!-- Identidade visual -->
+        <div class="marca" aria-hidden="true">AA</div>
+
+        <h1>Criar uma conta</h1>
+
+        <p class="subtitulo">
+            Cadastre-se para organizar e acompanhar suas atividades.
+        </p>
+
+        <!-- Mensagens do Flask -->
+        {% with mensagens = get_flashed_messages(with_categories=true) %}
+            {% for categoria, mensagem in mensagens %}
+                <p class="mensagem" role="alert">
+                    {{ mensagem }}
+                </p>
+            {% endfor %}
+        {% endwith %}
+
+        <!-- Formulário -->
+        <form method="POST">
+
+            <label for="nome">Nome completo</label>
+            <input
+                type="text"
+                id="nome"
+                name="nome"
+                maxlength="100"
+                autocomplete="name"
+                required
+            >
+
+            <label for="email">E-mail</label>
+            <input
+                type="email"
+                id="email"
+                name="email"
+                maxlength="120"
+                autocomplete="email"
+                required
+            >
+
+            <label for="senha">Criar senha</label>
+            <input
+                type="password"
+                id="senha"
+                name="senha"
+                minlength="8"
+                autocomplete="new-password"
+                required
+            >
+
+            <label for="confirmar_senha">Confirmar senha</label>
+            <input
+                type="password"
+                id="confirmar_senha"
+                name="confirmar_senha"
+                minlength="8"
+                autocomplete="new-password"
+                required
+            >
+
+            <button class="botao-cadastro" type="submit">
+                Criar minha conta
+            </button>
+
+        </form>
+
+        <a class="voltar" href="{{ url_for('login') }}">
+            Já tenho uma conta? Voltar ao login
+        </a>
+
+        <p class="rodape">
+            Juntos pela preservação da natureza.
+        </p>
+
+    </main>
+
+    <!-- Funcionamento dos botões A+ e A− -->
+    <script>
+        const botaoAumentar =
+            document.getElementById("aumentar-letras");
+
+        const botaoDiminuir =
+            document.getElementById("diminuir-letras");
+
+        const tamanhoPadrao = 16;
+        const tamanhoMinimo = 12;
+        const tamanhoMaximo = 24;
+
+        let tamanhoAtual = tamanhoPadrao;
+
+        // Recupera o tamanho salvo no navegador.
+        try {
+            const tamanhoSalvo = Number(
+                localStorage.getItem("tamanhoFonte")
+            );
+
+            if (
+                localStorage.getItem("tamanhoFonte") !== null &&
+                Number.isFinite(tamanhoSalvo) &&
+                tamanhoSalvo >= tamanhoMinimo &&
+                tamanhoSalvo <= tamanhoMaximo
+            ) {
+                tamanhoAtual = tamanhoSalvo;
+            }
+        } catch (erro) {
+            // O controle continua funcionando sem armazenamento.
+        }
+
+        function aplicarTamanho() {
+            document.documentElement.style.fontSize =
+                tamanhoAtual + "px";
+
+            try {
+                localStorage.setItem(
+                    "tamanhoFonte",
+                    String(tamanhoAtual)
+                );
+            } catch (erro) {
+                // O tamanho continua sendo ajustado nesta página.
+            }
+        }
+
+        botaoAumentar.addEventListener("click", function () {
+            tamanhoAtual = Math.min(
+                tamanhoAtual + 2,
+                tamanhoMaximo
+            );
+
+            aplicarTamanho();
+        });
+
+        botaoDiminuir.addEventListener("click", function () {
+            tamanhoAtual = Math.max(
+                tamanhoAtual - 2,
+                tamanhoMinimo
+            );
+
+            aplicarTamanho();
+        });
+
+        aplicarTamanho();
+    </script>
+</body>
+</html>

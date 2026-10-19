@@ -1,23 +1,41 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import (
+    Flask, render_template, request,
+    redirect, url_for, session, flash
+)
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from pathlib import Path
+import os
 
-# Instituto Arara Azul - MVP
+# =====================================
+# INSTITUTO ARARA AZUL - MVP
+# =====================================
 
 app = Flask(__name__)
 
-app.config["SECRET_KEY"] = "chave-mvp-arara-azul"
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database/arara_azul.db"
+app.config["SECRET_KEY"] = os.environ.get(
+    "SECRET_KEY",
+    "chave-mvp-arara-azul"
+)
+
+# Banco SQLite dentro da pasta instance
+pasta_banco = Path(app.instance_path) / "database"
+pasta_banco.mkdir(parents=True, exist_ok=True)
+
+arquivo_banco = pasta_banco / "arara_azul.db"
+
+app.config["SQLALCHEMY_DATABASE_URI"] = (
+    "sqlite:///" + arquivo_banco.as_posix()
+)
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 
 
-# =========================
-# MODELOS DO BANCO DE DADOS
-# =========================
+# =====================================
+# MODELO DE USUÁRIO
+# =====================================
 
 class Usuario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -26,15 +44,21 @@ class Usuario(db.Model):
     senha_hash = db.Column(db.String(255), nullable=False)
 
 
+# =====================================
+# MODELO DE ATIVIDADE
+# =====================================
+
 class Atividade(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     titulo = db.Column(db.String(150), nullable=False)
     descricao = db.Column(db.Text, nullable=False)
+
     status = db.Column(
         db.String(30),
         nullable=False,
         default="Pendente"
     )
+
     usuario_id = db.Column(
         db.Integer,
         db.ForeignKey("usuario.id"),
@@ -42,9 +66,9 @@ class Atividade(db.Model):
     )
 
 
-# =========================
-# CONTROLE DE LOGIN
-# =========================
+# =====================================
+# PROTEÇÃO DAS PÁGINAS
+# =====================================
 
 def login_required(func):
     @wraps(func)
@@ -57,52 +81,111 @@ def login_required(func):
     return wrapper
 
 
-# =========================
+# =====================================
 # LOGIN
-# =========================
+# =====================================
 
 @app.route("/", methods=["GET", "POST"])
 def login():
 
     if request.method == "POST":
-
-        email = request.form.get("email", "").strip()
+        email = request.form.get("email", "").strip().lower()
         senha = request.form.get("senha", "")
 
         usuario = Usuario.query.filter_by(email=email).first()
 
         if usuario and check_password_hash(
-            usuario.senha_hash,
-            senha
+            usuario.senha_hash, senha
         ):
+            session.clear()
             session["usuario_id"] = usuario.id
             session["usuario_nome"] = usuario.nome
 
             return redirect(url_for("atividades"))
 
-        flash(
-            "E-mail ou senha inválidos.",
-            "erro"
-        )
+        flash("E-mail ou senha inválidos.", "erro")
 
     return render_template("login.html")
 
 
-# =========================
-# LOGOUT
-# =========================
+# =====================================
+# CADASTRO DE USUÁRIOS
+# =====================================
+
+@app.route("/cadastro", methods=["GET", "POST"])
+def cadastro():
+
+    if request.method == "POST":
+        nome = request.form.get("nome", "").strip()
+        email = request.form.get("email", "").strip().lower()
+        senha = request.form.get("senha", "")
+        confirmar_senha = request.form.get(
+            "confirmar_senha", ""
+        )
+
+        if not nome or not email or not senha or not confirmar_senha:
+            flash("Preencha todos os campos.", "erro")
+            return render_template("cadastro.html")
+
+        if len(senha) < 8:
+            flash(
+                "A senha deve ter pelo menos 8 caracteres.",
+                "erro"
+            )
+            return render_template("cadastro.html")
+
+        if senha != confirmar_senha:
+            flash("As senhas não são iguais.", "erro")
+            return render_template("cadastro.html")
+
+        usuario_existente = Usuario.query.filter_by(
+            email=email
+        ).first()
+
+        if usuario_existente:
+            flash("Este e-mail já está cadastrado.", "erro")
+            return render_template("cadastro.html")
+
+        novo_usuario = Usuario(
+            nome=nome,
+            email=email,
+            senha_hash=generate_password_hash(senha)
+        )
+
+        try:
+            db.session.add(novo_usuario)
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            app.logger.exception("Erro ao cadastrar usuário")
+            flash(
+                "Não foi possível concluir o cadastro. Tente novamente.",
+                "erro"
+            )
+            return render_template("cadastro.html")
+
+        flash(
+            "Cadastro realizado com sucesso! Faça seu login.",
+            "sucesso"
+        )
+        return redirect(url_for("login"))
+
+    return render_template("cadastro.html")
+
+
+# =====================================
+# SAIR DO SISTEMA
+# =====================================
 
 @app.route("/logout")
 def logout():
-
     session.clear()
-
     return redirect(url_for("login"))
 
 
-# =========================
-# LISTA DE ATIVIDADES
-# =========================
+# =====================================
+# LISTAR ATIVIDADES
+# =====================================
 
 @app.route("/atividades")
 @login_required
@@ -120,36 +203,21 @@ def atividades():
     )
 
 
-# =========================
-# NOVA ATIVIDADE
-# =========================
+# =====================================
+# CADASTRAR NOVA ATIVIDADE
+# =====================================
 
 @app.route("/atividades/nova", methods=["GET", "POST"])
 @login_required
 def nova_atividade():
 
     if request.method == "POST":
-
-        titulo = request.form.get(
-            "titulo",
-            ""
-        ).strip()
-
-        descricao = request.form.get(
-            "descricao",
-            ""
-        ).strip()
+        titulo = request.form.get("titulo", "").strip()
+        descricao = request.form.get("descricao", "").strip()
 
         if not titulo or not descricao:
-
-            flash(
-                "Preencha todos os campos.",
-                "erro"
-            )
-
-            return render_template(
-                "nova_atividade.html"
-            )
+            flash("Preencha todos os campos.", "erro")
+            return render_template("nova_atividade.html")
 
         atividade = Atividade(
             titulo=titulo,
@@ -161,23 +229,15 @@ def nova_atividade():
         db.session.add(atividade)
         db.session.commit()
 
-        flash(
-            "Atividade cadastrada com sucesso.",
-            "sucesso"
-        )
+        flash("Atividade cadastrada com sucesso.", "sucesso")
+        return redirect(url_for("atividades"))
 
-        return redirect(
-            url_for("atividades")
-        )
-
-    return render_template(
-        "nova_atividade.html"
-    )
+    return render_template("nova_atividade.html")
 
 
-# =========================
-# ALTERAR STATUS
-# =========================
+# =====================================
+# ALTERAR STATUS DA ATIVIDADE
+# =====================================
 
 @app.route(
     "/atividades/<int:id>/status",
@@ -191,33 +251,27 @@ def alterar_status(id):
         usuario_id=session["usuario_id"]
     ).first_or_404()
 
-    novo_status = request.form.get(
-        "status"
-    )
+    novo_status = request.form.get("status")
 
-    if novo_status in [
+    status_validos = [
         "Pendente",
         "Em andamento",
         "Concluída"
-    ]:
+    ]
 
+    if novo_status in status_validos:
         atividade.status = novo_status
-
         db.session.commit()
+        flash("Status atualizado.", "sucesso")
+    else:
+        flash("Status inválido.", "erro")
 
-        flash(
-            "Status atualizado.",
-            "sucesso"
-        )
-
-    return redirect(
-        url_for("atividades")
-    )
+    return redirect(url_for("atividades"))
 
 
-# =========================
+# =====================================
 # EXCLUIR ATIVIDADE
-# =========================
+# =====================================
 
 @app.route(
     "/atividades/<int:id>/excluir",
@@ -234,57 +288,34 @@ def excluir_atividade(id):
     db.session.delete(atividade)
     db.session.commit()
 
-    flash(
-        "Atividade excluída.",
-        "sucesso"
-    )
-
-    return redirect(
-        url_for("atividades")
-    )
+    flash("Atividade excluída.", "sucesso")
+    return redirect(url_for("atividades"))
 
 
-# =========================
-# DADOS INICIAIS
-# =========================
+# =====================================
+# INICIALIZAR BANCO DE DADOS
+# =====================================
 
-def criar_dados_iniciais():
+with app.app_context():
+    db.create_all()
 
+    # Conta de demonstração para testes.
+    # Só é criada se ainda não existir nenhum usuário.
     if Usuario.query.count() == 0:
-
-        usuario = Usuario(
+        usuario_demo = Usuario(
             nome="Voluntário Demo",
             email="voluntario@exemplo.com",
-            senha_hash=generate_password_hash(
-                "12345678"
-            )
+            senha_hash=generate_password_hash("12345678")
         )
 
-        db.session.add(usuario)
+        db.session.add(usuario_demo)
         db.session.commit()
 
 
-# =========================
-# INICIALIZAÇÃO DO BANCO
-# =========================
-
-with app.app_context():
-
-    Path("database").mkdir(
-        exist_ok=True
-    )
-
-    db.create_all()
-
-    criar_dados_iniciais()
-
-
-# =========================
+# =====================================
 # EXECUTAR A APLICAÇÃO
-# =========================
+# =====================================
 
 if __name__ == "__main__":
+    app.run(debug=True)
 
-    app.run(
-        debug=True
-    )
