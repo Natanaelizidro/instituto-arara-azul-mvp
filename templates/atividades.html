@@ -56,7 +56,8 @@
             overflow-wrap: anywhere;
         }
 
-        a, button {
+        a,
+        button {
             display: inline-block;
             padding: 11px 17px;
             margin: 5px 5px 5px 0;
@@ -78,7 +79,8 @@
             color: #07529b;
         }
 
-        a:hover, button:hover {
+        a:hover,
+        button:hover {
             transform: translateY(-1px);
         }
 
@@ -96,7 +98,9 @@
             background: #105b3a;
         }
 
-        a:focus-visible, button:focus-visible, select:focus-visible {
+        a:focus-visible,
+        button:focus-visible,
+        select:focus-visible {
             outline: 3px solid #f0a500;
             outline-offset: 3px;
         }
@@ -116,6 +120,7 @@
 
         .acessibilidade button {
             min-width: 52px;
+            min-height: 44px;
             background: #064fbd;
             border: 2px solid #064fbd;
             font-size: 18px;
@@ -123,11 +128,6 @@
 
         .acessibilidade button:hover {
             background: #043b8d;
-        }
-
-        #aviso-fonte {
-            font-weight: bold;
-            color: #243447;
         }
 
         article {
@@ -190,7 +190,8 @@
                 padding: 18px;
             }
 
-            a, button {
+            a,
+            button {
                 min-height: 44px;
             }
 
@@ -231,10 +232,6 @@
                     aria-label="Diminuir tamanho da fonte">
                 A−
             </button>
-
-            <span id="aviso-fonte"
-                  role="status"
-                  aria-live="polite"></span>
         </div>
 
         {% with mensagens = get_flashed_messages(with_categories=true) %}
@@ -296,7 +293,11 @@
     </main>
 
     <script>
-        let tamanhoFonte = 16;
+        let tamanhoFonte = Number(localStorage.getItem("tamanhoFonte")) || 16;
+
+        function aplicarFonte() {
+            document.body.style.fontSize = tamanhoFonte + "px";
+        }
 
         function alterarFonte(direcao) {
             tamanhoFonte += direcao * 2;
@@ -304,11 +305,11 @@
             if (tamanhoFonte > 24) tamanhoFonte = 24;
             if (tamanhoFonte < 12) tamanhoFonte = 12;
 
-            document.body.style.fontSize = tamanhoFonte + "px";
-
-            document.getElementById("aviso-fonte").textContent =
-                "Tamanho da fonte: " + tamanhoFonte + " pixels.";
+            localStorage.setItem("tamanhoFonte", tamanhoFonte);
+            aplicarFonte();
         }
+
+        aplicarFonte();
     </script>
 </body>
 </html>
